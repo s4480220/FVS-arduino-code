@@ -4,7 +4,7 @@ extern "C" {
 #include "utility/twi.h" // from Wire library, so we can do bus scanning
 }
 #define TCAADDR 0x70
-MS5837 sensor;
+MS5837 sensor[8];
 
 void tcaselect(uint8_t i) {
   if (i > 7) return;
@@ -45,24 +45,10 @@ void loop() {
   Wire.begin();
   for (uint8_t t=0; t<8; t++) { // Initialising sensor data
     tcaselect(t);
-    for (uint8_t addr = 0; addr<=127; addr++) {
-      if (addr == TCAADDR) continue;
-      uint8_t data;
-      if (! twi_writeTo(addr, &data, 0, 1, 1)) {
-        Wire.begin();
-        while (!sensor.init()) {
-        }
-        sensor.setModel(MS5837::MS5837_30BA);
-        sensor.setFluidDensity(997); // kg/m^3 (freshwater, 1029 for seawater)
-        
-        //Timing section of code
-        //unsigned long timeBegin = millis();
-        // INSERT CODE HERE
-        //unsigned long timeEnd = millis();
-        //unsigned long duration = timeEnd - timeBegin;
-        //Serial.print(duration);
-      }
+    while (!sensor[t].init()) {
     }
+    sensor[t].setModel(MS5837::MS5837_30BA);
+    sensor[t].setFluidDensity(997); // kg/m^3 (freshwater, 1029 for seawater)
   }
   for (uint8_t t=0; t<8; t++) { // Starting/Writing D1 data from sensors
     tcaselect(t);
